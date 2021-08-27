@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+</head>
+
+<body>
+  <div id="app">
+    <table align="center" cellspacing="0" cellpadding="5">
+      <tr>
+        <td>
+          Product ID: <input v-model="productId" @keyup="onChange" type="text">
+          Dianping Product Id: <input v-model="dianpingProductId" @keyup="onChange" type="text">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input v-model="type" type="radio" checked="checked" name="type" :value="1"> Reseve
+          <input v-model="type" type="radio" name="type" :value="2"> Commit
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <textarea v-model="reserve" v-if="type===1" rows="20" id="txtReserve" style="width:600px"
+            name="txtReserve"></textarea>
+          <textarea v-model="commit" v-else rows="8" id="txtCommit" style="width:600px" @paste="onPaste"
+            placeholder="Past reservation's result in here" name="txtCommit"></textarea>
+          <pre v-if="type===2">{{commitRs}}</pre>
+
+        </td>
+      </tr>
+      <tr>
+        <td><input type="submit" @click="onSubmit" /></td>
+      </tr>
+    </table>
+    <div>Result: </div>
+    <div class="wrap-word"> {{result}}</div>
+    <button v-if="result" @click="onCopy">Copy</button>
+    </form>
+    <div id="snackbar">...</div>
+  </div>
+  <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="http://www.myersdaily.org/joseph/javascript/md5.js"></script>
+  <style>
+    .wrap-word {
+      word-break: break-all
+    }
+
+    /* The snackbar - position it at the bottom and in the middle of the screen */
+    #snackbar {
+      visibility: hidden;
+      /* Hidden by default. Visible on click */
+      min-width: 250px;
+      /* Set a default minimum width */
+      margin-left: -125px;
+      /* Divide value of min-width by 2 */
+      background-color: #333;
+      /* Black background color */
+      color: #fff;
+      /* White text color */
+      text-align: center;
+      /* Centered text */
+      border-radius: 2px;
+      /* Rounded borders */
+      padding: 16px;
+      /* Padding */
+      position: fixed;
+      /* Sit on top of the screen */
+      z-index: 1;
+      /* Add a z-index if needed */
+      left: 50%;
+      /* Center the snackbar */
+      bottom: 30px;
+      /* 30px from the bottom */
+    }
+
+    /* Show the snackbar when clicking on a button (class added with JavaScript) */
+    #snackbar.show {
+      visibility: visible;
+      /* Show the snackbar */
+      /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+  However, delay the fade out process for 2.5 seconds */
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    /* Animations to fade the snackbar in and out */
+    @-webkit-keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
+
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadein {
+      from {
+        bottom: 0;
+        opacity: 0;
+      }
+
+      to {
+        bottom: 30px;
+        opacity: 1;
+      }
+    }
+
+    @-webkit-keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
+
+    @keyframes fadeout {
+      from {
+        bottom: 30px;
+        opacity: 1;
+      }
+
+      to {
+        bottom: 0;
+        opacity: 0;
+      }
+    }
+  </style>
+  </head>
+  <script>
+    const RESERVE = {
+      "orderId": 312,
+      "productId": 0,
+      "otaPid": 0,
+      "contactInfo": {
+        "phone": "+81-8067748388",
+        "email": "test@mail.com",
+        "secondName": "aaaa",
+        "firstName": "bbbb"
+      },
+      "passengerInfos": [
+        {
+          "secondName": "a",
+          "firstName": "b"
+        }
+      ],
+      "reservation": {
+        "reserveNumber": 2,
+        "reserveConsumeTime1": dayjs().format("YYYY-MM-DD"),
+      },
+      "confirmType": 1
+    }
+    const COMMIT = {
+      "orderId": '',
+      "productId": '',
+      "otaPid": '',
+      "otaOrderId": ''
+    }
+    const SECURITY_CODE = "d9e26e82de1deabda29fbd1e5678ae33"
+    const OTA_ID = 407202669
+    var app = new Vue({
+      el: '#app',
+      data: {
+        reserve: JSON.stringify(RESERVE, undefined, 2),
+        commit: '',
+        commitRs: '',
+        productId: 0,
+        dianpingProductId: 0,
+        type: 1,
+        code: '',
+        result: ''
+      },
+      mounted() {
+        if (localStorage.productId) {
+          this.productId = localStorage.productId;
+        }
+        if (localStorage.dianpingProductId) {
+          this.dianpingProductId = localStorage.dianpingProductId;
+        }
+
+        const rs = JSON.parse(this.reserve)
+        rs.otaPid = parseInt(this.productId)
+        rs.productId = parseInt(this.dianpingProductId)
+        this.reserve = JSON.stringify(rs, undefined, 2);
+      },
+      computed: {
+
+      },
+      watch: {
+        type(newValue, oldValue) {
+          this.result = ''
+        }
+      },
+      methods: {
+        onCopy() {
+          navigator.clipboard.writeText(this.result);
+          this.showMsg("Message was copied")
+        },
+        onChange(val) {
+          const rs = JSON.parse(this.reserve)
+          rs.otaPid = parseInt(this.productId)
+          rs.productId = parseInt(this.dianpingProductId)
+          this.reserve = JSON.stringify(rs, undefined, 2);
+
+          localStorage.productId = this.productId;
+          localStorage.dianpingProductId = this.dianpingProductId;
+
+        },
+
+        onPaste(evt) {
+          const val = JSON.parse(evt.clipboardData.getData('text'))
+          this.commitRs = COMMIT
+          this.commitRs.orderId = parseInt(val.orderId);
+          this.commitRs.otaPid = parseInt(this.productId);
+          this.commitRs.productId = parseInt(this.dianpingProductId);
+          this.commitRs.otaOrderId = parseInt(val.otaOrderId);
+        },
+        onSubmit() {
+
+          const str = this.type === 1 ? this.reserve : JSON.stringify(this.commitRs, undefined, 2)
+          this.result = this.objToUrlEncode(str)
+          this.showMsg("Successfully")
+        },
+
+
+        objToUrlEncode(obj) {
+          var dataReserve = {
+            "otaId": OTA_ID,
+            "data": "",
+            "sign": ""
+          }
+
+          var base64data = btoa(obj);
+          var hash = md5(SECURITY_CODE + OTA_ID + base64data);
+          dataReserve.data = base64data
+          dataReserve.sign = hash
+
+          var url = encodeURI(JSON.stringify(dataReserve))
+          return url
+        },
+        toBinary(string) {
+          const codeUnits = new Uint16Array(string.length);
+          for (let i = 0; i < codeUnits.length; i++) {
+            codeUnits[i] = string.charCodeAt(i);
+          }
+          const charCodes = new Uint8Array(codeUnits.buffer);
+          let result = '';
+          for (let i = 0; i < charCodes.byteLength; i++) {
+            result += String.fromCharCode(charCodes[i]);
+          }
+          return result;
+        },
+        showMsg(msg) {
+          var x = document.getElementById("snackbar");
+          x.innerHTML = msg
+          x.className = "show";
+          setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
+        }
+      },
+
+    })
+  </script>
+</body>
+
+</html>
