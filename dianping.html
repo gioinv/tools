@@ -36,9 +36,17 @@
         <td><input type="submit" @click="onSubmit" /></td>
       </tr>
     </table>
+    
     <div>Result: </div>
     <div class="wrap-word"> {{result}}</div>
     <button v-if="result" @click="onCopy">Copy</button>
+    <div style="margin-top:20px;padding:10px; border:1px solid grey">
+      * Note: 
+    <ul>
+      <li>Product type =1 => sửa reservation</li>
+      <li>Product type =4 => sửa contactInfo.startDate và orderItems</li>
+    </ul>
+    </div>
     </form>
     <div id="snackbar">...</div>
   </div>
@@ -147,7 +155,8 @@
         "phone": "+81-8067748388",
         "email": "test@mail.com",
         "secondName": "aaaa",
-        "firstName": "bbbb"
+        "firstName": "bbbb",
+        "startDate": dayjs().format("YYYY-MM-DD")
       },
       "passengerInfos": [
         {
@@ -157,8 +166,13 @@
       ],
       "reservation": {
         "reserveNumber": 2,
-        "reserveConsumeTime1": dayjs().format("YYYY-MM-DD"),
+        "reserveConsumeTime1": dayjs().format("YYYY-MM-DD HH:mm"), 
       },
+      "orderItems": [
+        {
+          "quantity": 2
+        }
+      ],
       "confirmType": 1
     }
     const COMMIT = {
@@ -172,6 +186,7 @@
     var app = new Vue({
       el: '#app',
       data: {
+        productType:1,
         reserve: JSON.stringify(RESERVE, undefined, 2),
         commit: '',
         commitRs: '',
