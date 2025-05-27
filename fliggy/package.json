@@ -1,0 +1,17 @@
+{
+  "name": "fliggy",
+  "version": "1.0.0",
+  "main": "run.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hiepnt",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "express": "^5.1.0",
+    "request": "^2.88.2"
+  }
+}

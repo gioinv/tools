@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Client with Signature Generation</title>
+  <style>
+    /* Reset và căn giữa toàn bộ trang */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center; /* Căn giữa theo chiều dọc */
+      justify-content: center; /* Căn giữa theo chiều ngang */
+      background-color: #f0f0f0;
+      font-family: 'Inter', sans-serif; /* Sử dụng font Inter */
+    }
+
+    /* Container chính cho bố cục hai cột */
+    .container {
+      display: flex;
+      gap: 40px; /* Khoảng cách giữa bên trái và bên phải */
+      max-width: 95vw; /* Tăng chiều rộng tối đa */
+      width: 1200px; /* Tăng chiều rộng cố định cho desktop */
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px; /* Góc bo tròn */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+    }
+
+    /* Cột bên trái và bên phải */
+    .left, .right {
+      display: flex;
+      flex-direction: column;
+      gap: 15px; /* Khoảng cách giữa các phần tử */
+      width: 580px; /* Điều chỉnh chiều rộng mỗi cột để phù hợp với container mới */
+    }
+
+    /* Nhóm các select và input */
+    .selects, .inputs {
+      display: flex;
+      gap: 10px; /* Khoảng cách giữa các select/input */
+    }
+
+    /* Kiểu dáng chung cho select, input, textarea */
+    select, input, textarea {
+      padding: 12px;
+      border: 1px solid #d1d5db; /* Màu viền xám nhạt */
+      border-radius: 8px; /* Góc bo tròn */
+      font-size: 14px;
+      width: 100%; /* Chiếm toàn bộ chiều rộng có sẵn */
+      box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #60a5fa; /* Màu xanh khi focus */
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25); /* Đổ bóng focus */
+    }
+
+    /* Kiểu dáng riêng cho textarea */
+    textarea {
+      resize: vertical; /* Chỉ cho phép thay đổi kích thước theo chiều dọc */
+      overflow-y: auto; /* Cho phép cuộn dọc khi nội dung tràn */
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      min-height: 100px; /* Chiều cao tối thiểu */
+    }
+
+    .left textarea {
+      height: 250px; /* Chiều cao cố định cho textarea Request Body */
+    }
+
+    .right textarea {
+      flex-grow: 1; /* Cho phép textarea Response Body mở rộng để lấp đầy không gian */
+      background-color: #f9fafb; /* Màu nền nhẹ hơn để chỉ rõ đây là trường chỉ đọc */
+      cursor: not-allowed; /* Thay đổi con trỏ chuột */
+      min-height: 300px; /* Chiều cao tối thiểu cho Response Body */
+    }
+
+    /* Kiểu dáng cho nút Run */
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background-color: #2563eb; /* Màu xanh đậm */
+      border: none;
+      border-radius: 8px; /* Góc bo tròn */
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #1d4ed8; /* Màu xanh đậm hơn khi hover */
+      transform: translateY(-1px); /* Hiệu ứng nhấc nhẹ */
+    }
+
+    button:active {
+      background-color: #1e40af; /* Màu xanh đậm nhất khi click */
+      transform: translateY(0); /* Trở về vị trí ban đầu */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column; /* Chuyển sang bố cục cột trên màn hình nhỏ */
+        gap: 20px;
+        padding: 20px;
+        width: 95vw; /* Chiếm gần hết chiều rộng màn hình */
+      }
+      .left, .right {
+        width: 100%; /* Mỗi cột chiếm toàn bộ chiều rộng */
+      }
+      .selects, .inputs {
+        flex-direction: column; /* Các select và input xếp chồng lên nhau */
+        gap: 15px;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <div class="selects">
+        <select id="domainSelect">
+          <option value="http://localhost:8082/">http://localhost:8082/</option>
+          <option value="https://api.dev.japanticket.com/">https://api.dev.japanticket.com/</option>
+        </select>
+        <select id="apiSelect">
+          <option value="fliggy/getActivityList">fliggy/getActivityList</option>
+          <option value="fliggy/getProductList">fliggy/getProductList</option>
+          <option value="fliggy/getAvailabilityList">fliggy/getAvailabilityList</option>
+          <option value="fliggy/preOrders">fliggy/preOrders</option>
+          <option value="fliggy/createOrder">fliggy/createOrder</option>
+          <option value="fliggy/cancelOrder">fliggy/cancelOrder</option>
+          <option value="fliggy/searchOrder">fliggy/searchOrder</option>
+          <option value="fliggy/searchVoucher">fliggy/searchVoucher</option>
+          <option value="fliggy/refund">fliggy/refund</option>
+        </select>
+      </div>
+      <div class="inputs">
+        <input id="appKey" type="text" placeholder="App Key" />
+        <input id="appSecret" type="text" placeholder="App Secret" />
+      </div>
+      <textarea id="body" placeholder="Request Body (JSON)"></textarea>
+      <button id="runButton">Run API Call</button>
+    </div>
+    <div class="right">
+      <textarea id="responseBody" placeholder="Response Body" readonly></textarea>
+    </div>
+  </div>
+  <script type="module" src="fliggy.js"></script>
+  <script type="module" src="run.js"></script>
+  <script>
+    let apiDataMap = {};
+
+    // Tải dữ liệu từ file JSON ngay khi trang được tải
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const response = await fetch('requestBody.json');
+        if (!response.ok) {
+          throw new Error(`Could not load requestBody.json: ${response.status}`);
+        }
+        apiDataMap = await response.json();
+
+        // Gọi updateRequestBody khi DOMContentLoaded
+        updateRequestBody();
+      } catch (error) {
+        console.error("Error loading API data map:", error);
+      }
+    });
+
+    // Cập nhật Request Body khi chọn API
+    document.getElementById("apiSelect").addEventListener("change", updateRequestBody);
+
+    function updateRequestBody() {
+      const apiSelect = document.getElementById("apiSelect");
+      const selectedApi = apiSelect.value;
+
+      // Lấy dữ liệu từ apiDataMap
+      const requestBody = apiDataMap[selectedApi] || {};
+
+      // Hiển thị trong textarea
+      const bodyTextarea = document.getElementById("body");
+      bodyTextarea.value = JSON.stringify(requestBody, null, 2);
+    }
+  </script>
+</body>
+</html>
