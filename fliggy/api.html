@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Client with Signature Generation</title>
+  <style>
+    /* Reset và căn giữa toàn bộ trang */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      /* Căn giữa theo chiều dọc */
+      justify-content: center;
+      /* Căn giữa theo chiều ngang */
+      background-color: #f0f0f0;
+      font-family: 'Inter', sans-serif;
+      /* Sử dụng font Inter */
+    }
+
+    /* Menu container */
+    .menu {
+      position: absolute;
+      top: 20px;
+      /* Đặt menu cách phía trên 20px */
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    /* Menu buttons */
+    .menu a {
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      background-color: #2563eb;
+      padding: 10px 20px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu a:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .menu a:active {
+      background-color: #1e40af;
+      transform: translateY(0);
+    }
+
+    .menu-link.active {
+  background-color: #1e40af; /* Màu nền của tab được chọn */
+  color: #ffffff; /* Màu chữ nổi bật */
+}
+
+    /* Container chính cho bố cục hai cột */
+    .container {
+      display: flex;
+      gap: 40px;
+      /* Khoảng cách giữa bên trái và bên phải */
+      max-width: 95vw;
+      /* Tăng chiều rộng tối đa */
+      width: 70%;
+      /* Đã thay đổi: Chiều rộng 90% của viewport */
+      height: 70%;
+      /* Đã thay đổi: Chiều cao 90% của viewport */
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      /* Góc bo tròn */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      /* Đổ bóng nhẹ */
+    }
+
+    /* Cột bên trái và bên phải */
+    .left,
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      /* Khoảng cách giữa các phần tử */
+      width: calc(50% - 20px);
+      /* Đã thay đổi: Chiếm 50% chiều rộng container trừ một nửa khoảng cách */
+      height: 100%;
+      /* Đã thay đổi: Chiếm toàn bộ chiều cao của container */
+    }
+
+    /* Nhóm các select và input */
+    .selects,
+    .inputs {
+      display: flex;
+      gap: 10px;
+      /* Khoảng cách giữa các select/input */
+    }
+
+    /* Kiểu dáng chung cho select, input */
+    select,
+    input {
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      /* Màu viền xám nhạt */
+      border-radius: 8px;
+      /* Góc bo tròn */
+      font-size: 14px;
+      width: 100%;
+      /* Chiếm toàn bộ chiều rộng có sẵn */
+      box-sizing: border-box;
+      /* Đảm bảo padding không làm tăng chiều rộng */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus,
+    input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      /* Màu xanh khi focus */
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+      /* Đổ bóng focus */
+    }
+
+    /* Kiểu dáng cho div Request Body (có thể chỉnh sửa) */
+    .request-body-editable {
+      resize: vertical;
+      /* Chỉ cho phép thay đổi kích thước theo chiều dọc */
+      overflow-y: auto;
+      /* Cho phép cuộn dọc khi nội dung tràn */
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      /* Đã bỏ min-height và max-height để linh hoạt hơn */
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      /* Màu viền xám nhạt */
+      border-radius: 8px;
+      /* Góc bo tròn */
+      box-sizing: border-box;
+      /* Đảm bảo padding không làm tăng chiều rộng */
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background-color: #ffffff;
+      /* Nền trắng cho editable field */
+      cursor: text;
+      /* Con trỏ văn bản */
+      white-space: pre-wrap;
+      /* Giữ định dạng khoảng trắng và xuống dòng */
+      word-wrap: break-word;
+      /* Ngắt từ nếu quá dài */
+      flex-grow: 1;
+      /* Cho phép nó mở rộng để lấp đầy không gian còn lại */
+    }
+
+    .request-body-editable:focus {
+      outline: none;
+      border-color: #60a5fa;
+      /* Màu xanh khi focus */
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+      /* Đổ bóng focus */
+    }
+
+    /* Kiểu dáng cho div Response Body (chỉ đọc) */
+    .response-body-highlight {
+      flex-grow: 1;
+      /* Cho phép div mở rộng để lấp đầy không gian */
+      background-color: #f9fafb;
+      /* Màu nền nhẹ hơn */
+      border: 1px solid #d1d5db;
+      /* Đường viền */
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      overflow-y: auto;
+      /* Cho phép cuộn */
+      white-space: pre-wrap;
+      /* Giữ định dạng khoảng trắng và xuống dòng */
+      word-wrap: break-word;
+      /* Ngắt từ nếu quá dài */
+      cursor: default;
+      /* Con trỏ mặc định vì nó không chỉnh sửa trực tiếp */
+      /* Đã bỏ min-height và max-height để linh hoạt hơn */
+    }
+
+    /* Các lớp CSS cho tô màu cú pháp JSON */
+    .json-key {
+      color: #d10000;
+      /* Màu đỏ cho key */
+    }
+
+    .json-string {
+      color: #008000;
+      /* Màu xanh lá cho chuỗi value */
+    }
+
+    .json-number,
+    .json-boolean,
+    .json-null {
+      color: #0000cd;
+      /* Màu xanh đậm cho số, boolean, null */
+    }
+
+    /* Kiểu dáng cho nút Run */
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background-color: #2563eb;
+      /* Màu xanh đậm */
+      border: none;
+      border-radius: 8px;
+      /* Góc bo tròn */
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+      /* Màu xanh đậm hơn khi hover */
+      transform: translateY(-1px);
+      /* Hiệu ứng nhấc nhẹ */
+    }
+
+    button:active {
+      background-color: #1e40af;
+      /* Màu xanh đậm nhất khi click */
+      transform: translateY(0);
+      /* Trở về vị trí ban đầu */
+    }
+
+    /* Responsive adjustments for medium screens (e.g., desktop with 90% zoom or smaller laptops) */
+    @media (max-width: 1280px) {
+      .container {
+        width: 90%;
+        /* Giữ 90% để phản hồi tốt hơn */
+        gap: 30px;
+        /* Giảm khoảng cách giữa các cột */
+      }
+      .left,
+      .right {
+        width: calc(50% - 15px);
+        /* Điều chỉnh chiều rộng mỗi cột: (90% - 30px) / 2 = 45% - 15px */
+      }
+    }
+
+    /* Responsive adjustments for small screens */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        /* Chuyển sang bố cục cột trên màn hình nhỏ */
+        gap: 20px;
+        padding: 20px;
+        width: 95vw;
+        /* Chiếm gần hết chiều rộng màn hình */
+      }
+
+      .left,
+      .right {
+        width: 100%;
+        /* Mỗi cột chiếm toàn bộ chiều rộng */
+      }
+
+      .selects,
+      .inputs {
+        flex-direction: column;
+        /* Các select và input xếp chồng lên nhau */
+        gap: 15px;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- Menu Navigation -->
+  <div class="menu">
+    <a href="api.html" class="menu-link">API</a>
+    <a href="callback.html" class="menu-link">Callback</a>
+  </div>
+  <div>
+    dev:
+    508ef25c-76db-4180-b114-4d876301f889 <br>
+    92847119-d165-4fc6-9f5d-4673b3a475ba
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div class="left">
+      <div class="selects">
+        <select id="domainSelect">
+          <option value="http://localhost:8082/">http://localhost:8082/</option>
+          <option value="https://api.dev.japanticket.com/">https://api.dev.japanticket.com/</option>
+        </select>
+        <select id="apiSelect">
+          <option value="fliggy/getActivityList">fliggy/getActivityList</option>
+          <option value="fliggy/getProductList">fliggy/getProductList</option>
+          <option value="fliggy/getAvailabilityList">fliggy/getAvailabilityList</option>
+          <option value="fliggy/preOrders">fliggy/preOrders</option>
+          <option value="fliggy/createOrder">fliggy/createOrder</option>
+          <option value="fliggy/cancelOrder">fliggy/cancelOrder</option>
+          <option value="fliggy/searchOrder">fliggy/searchOrder</option>
+          <option value="fliggy/searchVoucher">fliggy/searchVoucher</option>
+          <option value="fliggy/refund">fliggy/refund</option>
+        </select>
+      </div>
+      <div class="inputs">
+        <input id="appKey" type="text" placeholder="App Key" />
+        <input id="appSecret" type="text" placeholder="App Secret" />
+      </div>
+      <div id="requestBody" class="request-body-editable" contenteditable="true"></div>
+      <input id="requestHidden" type="hidden" />
+      <button id="runButton">Run API Call</button>
+    </div>
+    <div class="right">
+      <div id="responseBody" class="response-body-highlight" contenteditable="false"></div>
+    </div>
+  </div>
+  <script type="module" src="fliggy.js"></script>
+  <script type="module" src="run.js"></script>
+  <script>
+    let apiDataMap = {};
+  
+    function highlightJson(jsonString) {
+      return jsonString
+        .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:') // Keys
+        .replace(/: "(.*?)"/g, ': <span class="json-string">"$1"</span>') // String values
+        .replace(/: (\d+(\.\d+)?)/g, ': <span class="json-number">$1</span>') // Number values
+        .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>') // Boolean values
+        .replace(/: (null)/g, ': <span class="json-null">$1</span>'); // Null values
+    }
+  
+    async function fetchApiData() {
+      try {
+        const response = await fetch('fliggyApiRequestBody.json');
+        if (!response.ok) {
+          throw new Error(`Could not load fliggyApiRequestBody.json: ${response.status}`);
+        }
+        apiDataMap = await response.json();
+        updateRequestBody();
+      } catch (error) {
+        console.error("Error loading API data map:", error);
+      }
+    }
+  
+    function updateRequestBody() {
+      const apiSelect = document.getElementById("apiSelect");
+      const selectedApi = apiSelect.value;
+      const requestBody = apiDataMap[selectedApi] || {};
+  
+      renderRequestBody(requestBody);
+    }
+  
+    function handleInputChange(event, key) {
+      const inputValue = event.target.value;
+      const apiSelect = document.getElementById("apiSelect");
+      const selectedApi = apiSelect.value;
+  
+      if (apiDataMap[selectedApi]?.vendor?.extend) {
+        apiDataMap[selectedApi].vendor.extend[key] = inputValue;
+      } else {
+        apiDataMap[selectedApi] = { vendor: { extend: { [key]: inputValue } } };
+      }
+  
+      renderRequestBody(apiDataMap[selectedApi]);
+    }
+  
+    function renderRequestBody(requestBody) {
+      const formattedJson = JSON.stringify(requestBody, null, 2);
+      document.getElementById("requestHidden").value = formattedJson;
+  
+      const bodyTextarea = document.getElementById("requestBody");
+      bodyTextarea.innerHTML = highlightJson(formattedJson);
+      bodyTextarea.style.backgroundColor = '#f9fafb';
+    }
+  
+    document.addEventListener("DOMContentLoaded", fetchApiData);
+    document.getElementById("apiSelect").addEventListener("change", updateRequestBody);
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const menuLinks = document.querySelectorAll('.menu-link');
+
+  // Lấy URL hiện tại
+  const currentPath = window.location.pathname;
+
+  menuLinks.forEach(link => {
+    // Kiểm tra nếu href của link trùng với đường dẫn hiện tại
+    if (link.getAttribute('href') === currentPath) {
+      link.classList.add('active');
+    }
+
+    link.addEventListener('click', function(e) {
+      // Xóa lớp 'active' khỏi tất cả các link
+      menuLinks.forEach(link => link.classList.remove('active'));
+
+      // Thêm lớp 'active' vào tab được nhấn
+      this.classList.add('active');
+    });
+  });
+});
+
+</script>
+  
+</body>
+
+</html>

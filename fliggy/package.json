@@ -8,10 +8,11 @@
   "author": "hiepnt",
   "license": "ISC",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
     "crypto": "^1.0.1",
     "express": "^5.1.0",
+    "fs": "^0.0.1-security",
     "request": "^2.88.2"
   }
 }

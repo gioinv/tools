@@ -2,30 +2,24 @@ import SignatureGenerator from './fliggy.js';
 
 function highlightJson(jsonString) {
   const highlightedHtml = jsonString
-      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:') // Keys
-      .replace(/: "(.*?)"/g, ': <span class="json-string">"$1"</span>') // String values
-      .replace(/: (\d+(\.\d+)?)/g, ': <span class="json-number">$1</span>') // Number values
-      .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>') // Boolean values
-      .replace(/: (null)/g, ': <span class="json-null">$1</span>'); // Null values
+    .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:') // Keys
+    .replace(/: "(.*?)"/g, ': <span class="json-string">"$1"</span>') // String values
+    .replace(/: (\d+(\.\d+)?)/g, ': <span class="json-number">$1</span>') // Number values
+    .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>') // Boolean values
+    .replace(/: (null)/g, ': <span class="json-null">$1</span>'); // Null values
 
   return highlightedHtml;
 }
 
 async function callApi() {
-  const domain = document.getElementById('domainSelect').value;
-  const apiPath = document.getElementById('apiSelect').value;
-
-  let htmlContent = document.getElementById("requestBody").innerHTML;
-
-  const bodyText = htmlContent.replace(/<[^>]*>/g, "").trim();
-
-  const appKey = document.getElementById('appKey').value;
-  const appSecret = document.getElementById('appSecret').value;
-  const responseBodyElement = document.getElementById('responseBody'); 
-
-  const url = domain + apiPath;
-
+  const bodyText = document.getElementById('requestHidden').value;
   const bodyObj = bodyText ? JSON.parse(bodyText) : {};
+
+  const appKey = document.getElementById('callBackAppKey').value
+  const appSecret = document.getElementById('callBackAppSecret').value;
+  const responseBodyElement = document.getElementById('responseBody');
+
+  const url = "https://api-switch.fliggy.net"
 
   const signatureGenerator = new SignatureGenerator();
 

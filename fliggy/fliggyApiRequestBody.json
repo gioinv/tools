@@ -1,7 +1,7 @@
 {
   "fliggy/getActivityList": {
     "vendor": {
-      "type": "play",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "",
@@ -16,7 +16,7 @@
     "limit": 10,
     "page": 1,
     "vendor": {
-      "type": "play",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "",
@@ -36,7 +36,7 @@
     "startTime": "2025-05-26 00:00:00",
     "endTime": "2025-06-25 23:59:59",
     "vendor": {
-      "type": "play",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "test",
@@ -159,7 +159,7 @@
     "fliggyOrderId": "140051568742883350",
     "orderId": "54",
     "vendor": {
-      "type": "play",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "test-account",
@@ -172,7 +172,7 @@
     "fliggyOrderId": "140051568742883350",
     "orderId": "54",
     "vendor": {
-      "type": "play",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "test-account",

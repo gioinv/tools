@@ -73,7 +73,6 @@ export default class SignatureGenerator {
     timeStamp = null,
     nonce = null
   ) {
-    console.log("Calling...", document.getElementById('appKey').value);
     const request = JSON.stringify(dto); // Chuyển đổi DTO thành chuỗi JSON
     const httpMethod = "POST";
     const url = "/"; // Theo mã Kotlin, URL là "/"

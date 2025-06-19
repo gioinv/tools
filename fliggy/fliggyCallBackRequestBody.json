@@ -1,0 +1,202 @@
+{
+  "callBackProduct": {
+    "api": "com.fliggy.switch.vacation.callback.sandbox",
+    "data": {
+      "tag": "product_update",
+      "msg": {
+        "supplierKey": "local",
+        "sellerId": "2209681419397",
+        "accountId": "ee17ee1f-3b8c-4fae-9490-cf27b1aa7dcb",
+        "productIdList": [
+          "JPT_12",
+          "JPT_11"
+        ]
+      }
+    }
+  },
+  "fliggy/getProductList": {
+    "limit": 10,
+    "page": 1,
+    "vendor": {
+      "type": "play",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "",
+        "apiSecret": ""
+      }
+    },
+    "productIdList": []
+  },
+  "fliggy/getAvailabilityList": {
+    "productIdList": [
+      "21_1410_1_ja",
+      "21_1415_1_ja",
+      "21_1420_1_ja",
+      "21_1425_1_ja",
+      "21_1430_1_ja"
+    ],
+    "startTime": "2025-05-26 00:00:00",
+    "endTime": "2025-06-25 23:59:59",
+    "vendor": {
+      "type": "play",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "test",
+        "apiSecret": "123456"
+      }
+    }
+  },
+  "fliggy/preOrders": {
+    "bizType": 3,
+    "fliggyOrderId": "139694675140796418",
+    "vendor": {
+      "type": "jptLocalFunnyD",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "testaccountsandbox1",
+        "apiSecret": "123456@abc"
+      }
+    },
+    "contacts": {
+      "extendInfos": [],
+      "mobile": "14470000003",
+      "name": "张伟",
+      "firstName": "first name test",
+      "lastName": "last name test",
+      "mobilePrefix": "86",
+      "email": "ceqishan@fliggy.com"
+    },
+    "travellers": [
+      {
+        "extendInfos": [],
+        "certificateId": "330101197303014507",
+        "mobile": "14470000003",
+        "name": "张伟",
+        "mobilePrefix": "86",
+        "email": "ceqishan@fliggy.com",
+        "certificateType": 0
+      },
+      {
+        "extendInfos": [],
+        "certificateId": "330101198303017411",
+        "mobile": "14470000041",
+        "name": "张伟",
+        "mobilePrefix": "86",
+        "email": "shidanbasan@fliggy.com",
+        "certificateType": 0
+      }
+    ],
+    "product": {
+      "quantity": 2,
+      "productId": "642_0000_1_en",
+      "totalPrice": 2000,
+      "subProductList": [],
+      "travelDate": "2025-05-27",
+      "price": 1000,
+      "settlementPrice": 10,
+      "realNameSystem": 1,
+      "retailPrice": 1000
+    }
+  },
+  "fliggy/createOrder": {
+    "bizType": 3,
+    "fliggyOrderId": "139694675140796419",
+    "orderId": "248",
+    "vendor": {
+      "type": "jptLocalD",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "testaccountsandbox1",
+        "apiSecret": "123456@abc"
+      }
+    },
+    "contacts": {
+      "extendInfos": [],
+      "mobile": "14470000003",
+      "name": "张伟",
+      "firstName": "fliggy",
+      "lastName": "fliggy",
+      "mobilePrefix": "86",
+      "email": "hiennvebisolvn@gmail.com",
+      "country": "en"
+    },
+    "travellers": [
+      {
+        "extendInfos": [],
+        "certificateId": "330101197303014507",
+        "mobile": "14470000003",
+        "name": "张伟",
+        "mobilePrefix": "86",
+        "email": "hiennvebisolvn@gmail.com",
+        "certificateType": 0
+      },
+      {
+        "extendInfos": [],
+        "certificateId": "330101198303017411",
+        "mobile": "14470000041",
+        "name": "张伟",
+        "mobilePrefix": "86",
+        "email": "hiennvebisolvn@gmail.com",
+        "certificateType": 0
+      }
+    ],
+    "product": {
+      "quantity": 2,
+      "productId": "1_0900_1_ja",
+      "totalPrice": 200,
+      "subProductList": [],
+      "travelDate": "2025-06-28",
+      "price": 100,
+      "settlementPrice": 100,
+      "realNameSystem": 1,
+      "retailPrice": 100
+    }
+  },
+  "fliggy/cancelOrder": {
+    "orderId": "ORD12345",
+    "reason": "Customer changed mind"
+  },
+  "fliggy/searchOrder": {
+    "bizType": 3,
+    "fliggyOrderId": "140051568742883350",
+    "orderId": "54",
+    "vendor": {
+      "type": "play",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "test-account",
+        "apiSecret": "01234"
+      }
+    }
+  },
+  "fliggy/searchVoucher": {
+    "bizType": 3,
+    "fliggyOrderId": "140051568742883350",
+    "orderId": "54",
+    "vendor": {
+      "type": "play",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "test-account",
+        "apiSecret": "01234"
+      }
+    }
+  },
+  "fliggy/refund": {
+    "bizType": 3,
+    "fliggyOrderId": "string",
+    "orderId": "string",
+    "vendor": {
+      "type": "string",
+      "env": "sandbox",
+      "extend": {
+        "apiKey": "string",
+        "apiSecret": "string"
+      }
+    },
+    "refundType": 1,
+    "refundReason": "refund reason",
+    "refundFee": 0,
+    "extendMap": null
+  }
+}
