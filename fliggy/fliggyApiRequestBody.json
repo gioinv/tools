@@ -27,11 +27,7 @@
   },
   "fliggy/getAvailabilityList": {
     "productIdList": [
-      "21_1410_1_ja",
-      "21_1415_1_ja",
-      "21_1420_1_ja",
-      "21_1425_1_ja",
-      "21_1430_1_ja"
+      "21_1410_1_ja"
     ],
     "startTime": "2025-05-26 00:00:00",
     "endTime": "2025-06-25 23:59:59",
@@ -48,7 +44,7 @@
     "bizType": 3,
     "fliggyOrderId": "139694675140796418",
     "vendor": {
-      "type": "jptLocalFunnyD",
+      "type": "development",
       "env": "sandbox",
       "extend": {
         "apiKey": "testaccountsandbox1",
@@ -193,7 +189,7 @@
       }
     },
     "refundType": 1,
-    "refundReason": "refund reason",
+    "refundReason": "拍错／不想去了／无法出行",
     "refundFee": 0,
     "extendMap": null
   }

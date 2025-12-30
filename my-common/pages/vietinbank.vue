@@ -3,7 +3,7 @@
 
     <div class="w-3/4">
       <textarea rows="5" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Past payload" v-model="payload"></textarea>
+        placeholder="Past payload" v-model="payload" @paste="handlePaste"></textarea>
       <div class="flex gap-4 mb-5">
         <div class="flex-1">
           <label class="block mb-1 text-sm font-medium text-gray-700">Month</label>
@@ -32,7 +32,7 @@
           <thead>
             <tr>
               <th colspan="3" class="border border-black px-2 py-1 text-center">Ngày tháng ghi sổ</th>
-              <th rowspan="2" class="border border-black px-2 py-1 text-center">DIỄN GIẢI</th>
+              <th rowspan="2" colspan="3" class="border border-black px-2 py-1 text-center">DIỄN GIẢI</th>
               <th colspan="3" class="border border-black px-2 py-1 text-center">SỐ TIỀN</th>
               <th rowspan="2" class="border border-black px-2 py-1 text-center">Ghi chú</th>
             </tr>
@@ -50,7 +50,7 @@
               <td class="border border-black px-2 py-1"></td>
               <td class="border border-black px-2 py-1"></td>
               <td class="border border-black px-2 py-1"></td>
-              <td class="border border-black px-2 py-1">Số dư đầu kỳ</td>
+              <td colspan="3"  class="border border-black px-2 py-1">Số dư đầu kỳ</td>
               <td class="border border-black px-2 py-1"></td>
               <td class="border border-black px-2 py-1"></td>
               <td class="border border-black px-2 py-1">xxx</td>
@@ -61,6 +61,8 @@
               <td class="border border-black px-2 py-1">{{ item.trxId }}</td>
               <td class="border border-black px-2 py-1">{{ item.tranDate }}</td>
               <td class="border border-black px-2 py-1">{{ item.remark }}</td>
+              <td class="border border-gray-400 px-2 py-1">&nbsp;</td>
+              <td class="border border-gray-400 px-2 py-1">&nbsp;</td>
               <td class="border border-black px-2 py-1"> {{ item.income }}</td>
               <td class="border border-black px-2 py-1">{{ item.outcome }}</td>
               <td class="border border-black px-2 py-1"></td>
@@ -76,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const payload = ref('')
 const result = ref('')
@@ -88,6 +90,22 @@ const formatAmount = amountStr => {
   const num = parseFloat(amountStr.replace(/,/g, ''));
   return isNaN(num) ? '' : new Intl.NumberFormat('en-US').format(num);
 };
+
+const handlePaste = (event) => {
+  // Save to localStorage after paste
+  setTimeout(() => {
+    localStorage.setItem('vietinbank_payload', payload.value)
+  }, 0)
+}
+
+// Load from localStorage on mount
+onMounted(() => {
+  const savedPayload = localStorage.getItem('vietinbank_payload')
+  if (savedPayload) {
+    payload.value = savedPayload
+  }
+})
+
 async function handleSubmit() {
   
   const fromDate = `01/${selectedMonth.value.toString().padStart(2, '0')}/${selectedYear.value}`
@@ -99,12 +117,13 @@ async function handleSubmit() {
   data.toDate = formattedToDate
 
   try {
-    /* const response = await $fetch('https://efast.vietinbank.vn/api/v1/account/history', {
+    const response = await $fetch('https://efast.vietinbank.vn/api/v1/account/history', {
       method: 'POST',
       body: data
     })
-    const transactions = response.data.transactions */
-    let rs = [
+    
+    let rs = response.transactions 
+     /* let rs = [
       {
         "tranDate": "31-05-2025 10:06:31",
         "remark": "MST 0315384007 CDCS EBISOLVN nop 30 DPCD thang 05 nam 2025",
@@ -168,7 +187,7 @@ async function handleSubmit() {
         "trnSrc": null,
         "tellerId": "",
         "customerCode": null
-      }]
+      }]  */
 
     //sort
     rs = rs.sort((a, b) => {

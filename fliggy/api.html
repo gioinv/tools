@@ -56,9 +56,11 @@
     }
 
     .menu-link.active {
-  background-color: #1e40af; /* Màu nền của tab được chọn */
-  color: #ffffff; /* Màu chữ nổi bật */
-}
+      background-color: #1e40af;
+      /* Màu nền của tab được chọn */
+      color: #ffffff;
+      /* Màu chữ nổi bật */
+    }
 
     /* Container chính cho bố cục hai cột */
     .container {
@@ -242,6 +244,7 @@
         gap: 30px;
         /* Giảm khoảng cách giữa các cột */
       }
+
       .left,
       .right {
         width: calc(50% - 15px);
@@ -284,19 +287,14 @@
     <a href="api.html" class="menu-link">API</a>
     <a href="callback.html" class="menu-link">Callback</a>
   </div>
-  <div>
-    dev:
-    508ef25c-76db-4180-b114-4d876301f889 <br>
-    92847119-d165-4fc6-9f5d-4673b3a475ba
-  </div>
 
   <!-- Main Container -->
   <div class="container">
     <div class="left">
       <div class="selects">
-        <select id="domainSelect">
+        <select id="domainSelect" onchange="handleDomainChange(event)">
           <option value="http://localhost:8082/">http://localhost:8082/</option>
-          <option value="https://api.dev.japanticket.com/">https://api.dev.japanticket.com/</option>
+          <option value="https://api.dev.japanticket.com/" selected>https://api.dev.japanticket.com/</option>
         </select>
         <select id="apiSelect">
           <option value="fliggy/getActivityList">fliggy/getActivityList</option>
@@ -313,6 +311,7 @@
       <div class="inputs">
         <input id="appKey" type="text" placeholder="App Key" />
         <input id="appSecret" type="text" placeholder="App Secret" />
+        <input id="appName" type="text" placeholder="App Name" />
       </div>
       <div id="requestBody" class="request-body-editable" contenteditable="true"></div>
       <input id="requestHidden" type="hidden" />
@@ -326,7 +325,7 @@
   <script type="module" src="run.js"></script>
   <script>
     let apiDataMap = {};
-  
+
     function highlightJson(jsonString) {
       return jsonString
         .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:') // Keys
@@ -335,7 +334,7 @@
         .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>') // Boolean values
         .replace(/: (null)/g, ': <span class="json-null">$1</span>'); // Null values
     }
-  
+
     async function fetchApiData() {
       try {
         const response = await fetch('fliggyApiRequestBody.json');
@@ -348,67 +347,107 @@
         console.error("Error loading API data map:", error);
       }
     }
-  
+
     function updateRequestBody() {
       const apiSelect = document.getElementById("apiSelect");
       const selectedApi = apiSelect.value;
       const requestBody = apiDataMap[selectedApi] || {};
-  
+
       renderRequestBody(requestBody);
     }
-  
-    function handleInputChange(event, key) {
-      const inputValue = event.target.value;
-      const apiSelect = document.getElementById("apiSelect");
-      const selectedApi = apiSelect.value;
-  
-      if (apiDataMap[selectedApi]?.vendor?.extend) {
-        apiDataMap[selectedApi].vendor.extend[key] = inputValue;
-      } else {
-        apiDataMap[selectedApi] = { vendor: { extend: { [key]: inputValue } } };
-      }
-  
-      renderRequestBody(apiDataMap[selectedApi]);
-    }
-  
+
     function renderRequestBody(requestBody) {
+
+      const api = document.getElementById("apiSelect").value;
+      if (api === 'fliggy/getAvailabilityList') {
+        const date = new Date();
+        requestBody.startTime = date.toISOString().slice(0, 10) + ' 00:00:00';
+
+        date.setDate(date.getDate() + 1); 
+        requestBody.endTime = date.toISOString().slice(0, 10) + ' 23:59:00';
+      }
+      requestBody.vendor.type = document.getElementById('appName').value;
+
       const formattedJson = JSON.stringify(requestBody, null, 2);
       document.getElementById("requestHidden").value = formattedJson;
-  
+
       const bodyTextarea = document.getElementById("requestBody");
       bodyTextarea.innerHTML = highlightJson(formattedJson);
       bodyTextarea.style.backgroundColor = '#f9fafb';
     }
-  
-    document.addEventListener("DOMContentLoaded", fetchApiData);
-    document.getElementById("apiSelect").addEventListener("change", updateRequestBody);
-  </script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-  const menuLinks = document.querySelectorAll('.menu-link');
+    function handleDomainChange(event) {
+      setToLocalStorage('domain', document.getElementById('domainSelect').value);
 
-  // Lấy URL hiện tại
-  const currentPath = window.location.pathname;
+    }
+    function loadDdata() {
+      const inputs = document.querySelectorAll('input, select, div[contenteditable="true"]');
 
-  menuLinks.forEach(link => {
-    // Kiểm tra nếu href của link trùng với đường dẫn hiện tại
-    if (link.getAttribute('href') === currentPath) {
-      link.classList.add('active');
+      // Load saved values from local storage
+      inputs.forEach(input => {
+        const savedValue = localStorage.getItem(input.id);
+        if (savedValue !== null) {
+          if (input.tagName.toLowerCase() === 'div') {
+            input.innerHTML = savedValue;
+          } else {
+            input.value = savedValue;
+          }
+        }
+      });
     }
 
-    link.addEventListener('click', function(e) {
-      // Xóa lớp 'active' khỏi tất cả các link
-      menuLinks.forEach(link => link.classList.remove('active'));
+    function saveData() {
+      const inputs = document.querySelectorAll('input, select, div[contenteditable="true"]');
+      // Save values to local storage on change
+      inputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+          if (e.target.tagName.toLowerCase() === 'div') {
+            localStorage.setItem(e.target.id, e.target.innerHTML);
+          } else {
+            localStorage.setItem(e.target.id, e.target.value);
+          }
+        });
+      });
+    }
+    document.addEventListener("DOMContentLoaded", fetchApiData);
+    document.getElementById("apiSelect").addEventListener("change", updateRequestBody);
+    document.getElementById("domainSelect").addEventListener("change", updateRequestBody);
+    document.getElementById("appName").addEventListener("input", updateRequestBody);
 
-      // Thêm lớp 'active' vào tab được nhấn
-      this.classList.add('active');
+    document.addEventListener('DOMContentLoaded', () => {
+
+      loadDdata();
+      saveData();
+
     });
-  });
-});
+  </script>
 
-</script>
-  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuLinks = document.querySelectorAll('.menu-link');
+
+      // Lấy URL hiện tại
+      const currentPath = window.location.pathname;
+
+      menuLinks.forEach(link => {
+        // Kiểm tra nếu href của link trùng với đường dẫn hiện tại
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        }
+
+        link.addEventListener('click', function (e) {
+          // Xóa lớp 'active' khỏi tất cả các link
+          menuLinks.forEach(link => link.classList.remove('active'));
+
+          // Thêm lớp 'active' vào tab được nhấn
+          this.classList.add('active');
+        });
+      });
+    });
+
+  </script>
+
+
 </body>
 
 </html>

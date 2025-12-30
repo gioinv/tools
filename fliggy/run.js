@@ -72,5 +72,14 @@ async function callApi() {
 //     console.error('Lỗi khi xử lý file:', err);
 //   }
 // }
-
+function setToLocalStorage(key, value) {
+  try {
+    const serializedValue = typeof value === 'string'
+      ? value
+      : JSON.stringify(value);
+    localStorage.setItem(key, serializedValue);
+  } catch (error) {
+    console.error('Failed to set to localStorage:', error);
+  }
+}
 document.getElementById('runButton').addEventListener('click', callApi);

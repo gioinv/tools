@@ -195,7 +195,7 @@
       }
     },
     "refundType": 1,
-    "refundReason": "refund reason",
+    "refundReason": "拍错／不想去了／无法出行",
     "refundFee": 0,
     "extendMap": null
   }
